@@ -1,0 +1,31 @@
+{
+  "name": "typescript-graphql",
+  "scripts": {
+    "dev": "ts-node-dev --no-notify --respawn --transpile-only src/server"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.168",
+    "apollo-server": "2.19.2",
+    "graphql": "15.4.0",
+    "isemail": "^3.2.0",
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "@prisma/cli": "2.14.0",
+    "@prisma/client": "^2.14.0",
+    "@types/graphql": "14.5.0",
+    "@types/node": "12.19.14",
+    "@types/ws": "7.4.0",
+    "ts-node": "9.1.1",
+    "ts-node-dev": "1.1.1",
+    "typescript": "4.1.3"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "all"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  }
+}
