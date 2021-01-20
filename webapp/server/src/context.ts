@@ -14,7 +14,7 @@ export async function createContext(args: ExpressContext): Promise<Context> {
 
   if (args.req.headers && args.req.headers.authorization) {
     // TODO: use proper secure auth.
-    const user = await prisma.user.findOne({where: {email: args.req.headers.authorization}});
+    const user = await prisma.user.findUnique({where: {email: args.req.headers.authorization}});
     if (user) {
       ctx.user = user;
     }

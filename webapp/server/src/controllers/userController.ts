@@ -1,6 +1,8 @@
 import {gql} from "apollo-server";
 import {Context} from "../context";
 import isEmail from 'isemail';
+import {FindManyUserArgs} from '@prisma/client';
+import {decodeGlobalId, encodeGlobalId} from "../utils";
 
 export const userTypedefs = gql`
     
@@ -45,15 +47,62 @@ export const userTypedefs = gql`
 
 export const userResolvers = {
   Query: {
-    users: (parent, args, ctx: Context) => {
-      return ctx.prisma.user.findMany({cursor: {email: "asdf"}})
+    users: async (parent, args, ctx: Context) => {
+      const findManyArgs: FindManyUserArgs = {orderBy: {id: "asc"}};
+      let reversed = false;
+      if (args.after) {
+        const {type, id} = decodeGlobalId(args.after);
+        if (type === 'User') {
+          findManyArgs.cursor = {id: Number(id)};
+          findManyArgs.skip = 1;
+        }
+      } else if (args.before) {
+        const {type, id} = decodeGlobalId(args.before);
+        if (type === 'User') {
+          findManyArgs.cursor = {id: Number(id)};
+          findManyArgs.orderBy = {id: "desc"};
+          findManyArgs.skip = 1;
+          reversed = true;
+        }
+      }
+
+      if (args.pageSize) {
+        findManyArgs.take = args.pageSize;
+      } else {
+        findManyArgs.take = 20;
+      }
+
+      const users = await ctx.prisma.user.findMany(findManyArgs);
+      if (reversed) {
+        users.reverse();
+      }
+      const result: any = {
+        pageInfo: {
+          hasNextPage: true,
+          hasPreviousPage: true,
+          startCursor: users.length ? encodeGlobalId('User', '' + users[0].id): null,
+          endCursor: users.length ? encodeGlobalId('User', '' + users[users.length - 1].id) : null,
+        },
+        edges: users.map((user) => {
+          return {
+            node: user,
+            cursor: encodeGlobalId('User', '' + user.id),
+          }
+        })
+      }
+      if (users.length !== findManyArgs.take) {
+        if (reversed) {
+          result.hasPreviousPage = false;
+        } else {
+          result.hasNextPage = false;
+        }
+      }
+
+      return result;
     }
   },
   Mutation: {
     signupUser: async (parent, args, ctx: Context) => {
-      console.log("singing up user with stuff");
-      console.log(args);
-      console.log(ctx.user);
       const result: any = {clientMutationId: args.input.clientMutationId};
 
       if (isEmail.validate(args.input.email)) {
@@ -66,6 +115,11 @@ export const userResolvers = {
       }
 
       return result;
+    }
+  },
+  User: {
+    id: (parent) => {
+      return encodeGlobalId('User', parent.id);
     }
   }
 }
