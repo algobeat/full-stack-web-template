@@ -3,8 +3,9 @@ import {Context} from "../context";
 import isEmail from 'isemail';
 import {FindManyUserArgs} from '@prisma/client';
 import {decodeGlobalId, encodeGlobalId} from "../utils";
+import bcrypt from 'bcrypt';
 
-export const userTypedefs = gql`
+export const userTypeDefs = gql`
     
   type User implements Node {
     email: String!
@@ -106,7 +107,9 @@ export const userResolvers = {
       const result: any = {clientMutationId: args.input.clientMutationId};
 
       if (isEmail.validate(args.input.email)) {
-        const user = await ctx.prisma.user.create({data: {email: args.input.email, password: args.input.password, name: args.input.name}});
+
+        const hashedPassword = await bcrypt.hash(args.input.password, 10);
+        const user = await ctx.prisma.user.create({data: {email: args.input.email, password: hashedPassword, name: args.input.name}});
         result.success = true;
         result.user = user;
       } else {
