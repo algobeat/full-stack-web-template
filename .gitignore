@@ -32,3 +32,6 @@ yarn-error.log*
 
 dist/
 *.env*
+
+
+**/__generated__

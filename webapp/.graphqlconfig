@@ -1,0 +1,16 @@
+{
+  "name": "Shared and generated schema",
+  "projects": {
+    "server_generated": {
+      "includes": ["server/src/__generated__/**"]
+    },
+    "client": {
+      "includes": ["src/**", "server/src/**"],
+      "excludes": ["server/src/__generated__/**"]
+    },
+    "server": {
+      "includes": ["server/src/**"],
+      "excludes": ["server/src/__generated__/**"]
+    }
+  }
+}
