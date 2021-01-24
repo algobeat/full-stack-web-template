@@ -17,7 +17,6 @@ let concat = typeDefs.map(getGqlString).join("\n");
 // So combine them into the same type here!
 const extended = concat.matchAll(/  extend type ([a-zA-Z]+)\s*{((?:.|\n)*?)\n {2}}/g);
 for (const match of extended) {
-  console.log(match);
   const entire = match[0];
   const typeName = match[1];
   const contents = match[2];

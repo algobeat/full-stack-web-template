@@ -24,7 +24,7 @@ export const userTypeDefs = gql`
   }
 
   extend type Query {
-    users(after: String, before: String, pageSize: Int): UserConnection
+    users(after: ID, before: ID, first: Int): UserConnection
   }
 
   extend type Mutation {
@@ -67,8 +67,8 @@ export const userResolvers = {
         }
       }
 
-      if (args.pageSize) {
-        findManyArgs.take = args.pageSize;
+      if (args.first) {
+        findManyArgs.take = args.first;
       } else {
         findManyArgs.take = 20;
       }
@@ -91,11 +91,12 @@ export const userResolvers = {
           }
         })
       }
+
       if (users.length !== findManyArgs.take) {
         if (reversed) {
-          result.hasPreviousPage = false;
+          result.pageInfo.hasPreviousPage = false;
         } else {
-          result.hasNextPage = false;
+          result.pageInfo.hasNextPage = false;
         }
       }
 
