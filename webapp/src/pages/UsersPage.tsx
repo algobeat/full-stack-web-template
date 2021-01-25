@@ -1,9 +1,9 @@
 import * as React from 'react';
-import UsersTable from "../tables/userstable/UsersTable";
+import UsersTable from "../components/tables/userstable/UsersTable";
 import {QueryRenderer, RelayProp} from "react-relay";
-import environment from "../../relayEnvironment";
+import environment from "../relayEnvironment";
 import {graphql} from "babel-plugin-relay/macro";
-import {UsersPageQuery, UsersPageQueryResponse} from "./__generated__/UsersPageQuery.graphql";
+import {UsersPageQuery, UsersPageQueryResponse} from "../components/layout/__generated__/UsersPageQuery.graphql";
 import {Typography} from "@material-ui/core";
 
 interface UsersPageProps {
