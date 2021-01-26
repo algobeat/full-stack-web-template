@@ -47,6 +47,8 @@
     "@types/graphql": "14.5.0",
     "@types/ws": "7.4.0",
     "eslint-config-prettier": "^7.2.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.3",
     "prettier": "2.2.1",
     "ts-node": "9.1.1",
     "ts-node-dev": "1.1.1",
@@ -72,8 +74,7 @@
   },
   "resolutions": {
     "react-scripts/eslint-webpack-plugin": "2.3.0"
-  }
-{
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
@@ -82,5 +83,4 @@
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
   }
-}
 }

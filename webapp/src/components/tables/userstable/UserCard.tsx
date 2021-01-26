@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Card, Paper, Typography } from "@material-ui/core";
+import { Card, Typography } from "@material-ui/core";
 import { createFragmentContainer, RelayProp } from "react-relay";
 import { graphql } from "babel-plugin-relay/macro";
 import { UserCard_user } from "./__generated__/UserCard_user.graphql";

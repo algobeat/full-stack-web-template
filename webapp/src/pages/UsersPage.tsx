@@ -1,6 +1,6 @@
 import * as React from "react";
 import UsersTable from "../components/tables/userstable/UsersTable";
-import { QueryRenderer, RelayProp } from "react-relay";
+import { QueryRenderer } from "react-relay";
 import environment from "../relayEnvironment";
 import { graphql } from "babel-plugin-relay/macro";
 import { Typography } from "@material-ui/core";
@@ -14,7 +14,7 @@ interface UsersPageProps {
   props: UsersPageQueryResponse | null;
 }
 
-function UsersPage(props: UsersPageProps) {
+function UsersPageComponent(props: UsersPageProps) {
   if (props.error) {
     return <Typography>{props.error.message}</Typography>;
   }
@@ -24,7 +24,7 @@ function UsersPage(props: UsersPageProps) {
   return <UsersTable users={props.props} />;
 }
 
-export default function () {
+export default function UsersPage() {
   return (
     <QueryRenderer<UsersPageQuery>
       environment={environment}
@@ -33,7 +33,7 @@ export default function () {
           ...UsersTable_users
         }
       `}
-      render={UsersPage}
+      render={UsersPageComponent}
       variables={{
         count: 2,
         cursor: null,

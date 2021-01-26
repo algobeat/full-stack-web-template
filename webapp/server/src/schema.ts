@@ -1,9 +1,6 @@
-import { Context } from './context'
 import { gql } from 'apollo-server'
-import { PrismaClient } from '@prisma/client'
 import { userResolvers, userTypeDefs } from './controllers/userController'
 import * as _ from 'lodash'
-import jwt from 'jsonwebtoken'
 import { loginResolvers, loginTypeDefs } from './controllers/login'
 
 export const rootTypeDefs = gql`

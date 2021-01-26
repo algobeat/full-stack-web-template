@@ -1,10 +1,6 @@
 import * as React from "react";
-import { Button, Card, CardContent, Paper } from "@material-ui/core";
-import {
-  createFragmentContainer,
-  createPaginationContainer,
-  RelayPaginationProp,
-} from "react-relay";
+import { Button, Card, CardContent } from "@material-ui/core";
+import { createPaginationContainer, RelayPaginationProp } from "react-relay";
 import { graphql } from "babel-plugin-relay/macro";
 import { UsersTable_users } from "./__generated__/UsersTable_users.graphql";
 import UserCard from "./UserCard";

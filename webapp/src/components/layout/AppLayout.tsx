@@ -1,11 +1,9 @@
 import * as React from "react";
+import { useState } from "react";
 import { Sidebar } from "../navigation/Sidebar";
 import { TopNavBar } from "../navigation/TopNavBar";
-import UsersTable from "../tables/userstable/UsersTable";
-import UsersLayout from "../../pages/UsersPage";
 import styled from "styled-components";
 import { Toolbar, Typography } from "@material-ui/core";
-import { useState } from "react";
 import { QueryRenderer, RelayProp } from "react-relay";
 import environment from "../../relayEnvironment";
 import { graphql } from "babel-plugin-relay/macro";
@@ -13,7 +11,7 @@ import {
   AppLayoutQuery,
   AppLayoutQueryResponse,
 } from "./__generated__/AppLayoutQuery.graphql";
-import { Redirect, useHistory } from "react-router";
+import { Redirect } from "react-router";
 
 const Root = styled.div`
   display: flex;
