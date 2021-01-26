@@ -1,22 +1,20 @@
-import {Context} from './context';
-import {gql} from 'apollo-server';
-import {PrismaClient} from '@prisma/client';
-import {userResolvers, userTypeDefs} from "./controllers/userController";
-import * as _ from 'lodash';
-import jwt from 'jsonwebtoken';
-import {loginResolvers, loginTypeDefs} from "./controllers/login";
+import { Context } from './context'
+import { gql } from 'apollo-server'
+import { PrismaClient } from '@prisma/client'
+import { userResolvers, userTypeDefs } from './controllers/userController'
+import * as _ from 'lodash'
+import jwt from 'jsonwebtoken'
+import { loginResolvers, loginTypeDefs } from './controllers/login'
 
 export const rootTypeDefs = gql`
-
   interface Node {
     id: ID!
   }
-  
+
   interface Payload {
     success: Boolean!
     message: String
   }
-
 
   type PageInfo {
     hasNextPage: Boolean!
@@ -24,20 +22,23 @@ export const rootTypeDefs = gql`
     startCursor: String
     endCursor: String
   }
-  
+
   type Query {
     _: Boolean
   }
-  
+
   type Mutation {
     _: Boolean
-    
   }
 `
 
+export const rootResolvers = {}
 
-export const rootResolvers = {};
+export const typeDefs = [rootTypeDefs, userTypeDefs, loginTypeDefs]
 
-export const typeDefs = [rootTypeDefs, userTypeDefs, loginTypeDefs];
-
-export const resolvers = _.merge({}, rootResolvers, userResolvers, loginResolvers);
+export const resolvers = _.merge(
+  {},
+  rootResolvers,
+  userResolvers,
+  loginResolvers,
+)

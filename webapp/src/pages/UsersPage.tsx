@@ -1,10 +1,13 @@
-import * as React from 'react';
+import * as React from "react";
 import UsersTable from "../components/tables/userstable/UsersTable";
-import {QueryRenderer, RelayProp} from "react-relay";
+import { QueryRenderer, RelayProp } from "react-relay";
 import environment from "../relayEnvironment";
-import {graphql} from "babel-plugin-relay/macro";
-import {UsersPageQuery, UsersPageQueryResponse} from "../components/layout/__generated__/UsersPageQuery.graphql";
-import {Typography} from "@material-ui/core";
+import { graphql } from "babel-plugin-relay/macro";
+import { Typography } from "@material-ui/core";
+import {
+  UsersPageQuery,
+  UsersPageQueryResponse,
+} from "./__generated__/UsersPageQuery.graphql";
 
 interface UsersPageProps {
   error: Error | null;
@@ -18,22 +21,23 @@ function UsersPage(props: UsersPageProps) {
   if (!props.props) {
     return <Typography>Loading...</Typography>;
   }
-  return <UsersTable users={props.props}/>
+  return <UsersTable users={props.props} />;
 }
 
-export default function() {
-  return <QueryRenderer<UsersPageQuery>
-    environment={environment}
-    query={
-    graphql`
-       query UsersPageQuery {
+export default function () {
+  return (
+    <QueryRenderer<UsersPageQuery>
+      environment={environment}
+      query={graphql`
+        query UsersPageQuery {
           ...UsersTable_users
-       }
-  `}
-    render={UsersPage}
-    variables={{
-      count: 2,
-      cursor: null,
-    }}
-  />
+        }
+      `}
+      render={UsersPage}
+      variables={{
+        count: 2,
+        cursor: null,
+      }}
+    />
+  );
 }
