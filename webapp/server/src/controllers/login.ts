@@ -17,6 +17,7 @@ export const loginTypeDefs = gql`
   input LoginInput {
     email: String!
     password: String!
+    rememberMe: Boolean
   }
 
   type LoginPayload implements Payload {
@@ -58,7 +59,7 @@ export const loginResolvers = {
 
       const result = await bcrypt.compare(args.input.password, user.password)
       if (result) {
-        const token = renewJWT(user.email, ctx.res)
+        const token = renewJWT(user.email, ctx.res, args.input.rememberMe)
         return {
           success: true,
           user: user,

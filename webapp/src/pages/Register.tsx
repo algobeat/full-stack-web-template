@@ -52,11 +52,20 @@ export default function Register() {
         data.name,
         data.password
       );
-      console.log(result);
-      enqueueSnackbar("Successfully signed up! You may log in now.", {
-        variant: "success",
-      });
-      history.push("/auth/login/");
+
+      if (result.signupUser?.success) {
+        enqueueSnackbar("Successfully signed up! You may log in now.", {
+          variant: "success",
+        });
+        history.push("/auth/login/");
+      } else {
+        enqueueSnackbar(
+          "Error registering user: " + result.signupUser?.message,
+          {
+            variant: "error",
+          }
+        );
+      }
     } catch (e) {
       enqueueSnackbar("Error registering user: " + e.message, {
         variant: "error",

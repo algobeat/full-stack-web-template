@@ -4,8 +4,14 @@ import { commitMutation } from "relay-runtime";
 import { loginMutationResponse } from "./__generated__/loginMutation.graphql";
 
 const mutation = graphql`
-  mutation loginMutation($email: String!, $password: String!) {
-    login(input: { email: $email, password: $password }) {
+  mutation loginMutation(
+    $email: String!
+    $password: String!
+    $rememberMe: Boolean
+  ) {
+    login(
+      input: { email: $email, password: $password, rememberMe: $rememberMe }
+    ) {
       success
       message
       user {
@@ -19,9 +25,10 @@ const mutation = graphql`
 export async function loginMutation(
   environment: RelayModernEnvironment,
   email: string,
-  password: string
+  password: string,
+  rememberMe: boolean
 ): Promise<loginMutationResponse> {
-  const variables = { email, password };
+  const variables = { email, password, rememberMe };
 
   return new Promise((res, rej) => {
     commitMutation(environment, {

@@ -64,7 +64,8 @@ export default function Login() {
       const response = await loginMutation(
         environment,
         data.email,
-        data.password
+        data.password,
+        data.rememberMe
       );
       if (response.login?.success) {
         enqueueSnackbar(
@@ -120,7 +121,13 @@ export default function Login() {
               inputRef={register({ required: true })}
             />
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={
+                <Checkbox
+                  value="remember"
+                  color="primary"
+                  inputRef={register}
+                />
+              }
               label="Remember me"
             />
             <Button

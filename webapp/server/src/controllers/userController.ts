@@ -118,15 +118,28 @@ export const userResolvers = {
 
       if (isEmail.validate(args.input.email)) {
         const hashedPassword = await bcrypt.hash(args.input.password, 10)
-        const user = await ctx.prisma.user.create({
-          data: {
-            email: args.input.email,
-            password: hashedPassword,
-            name: args.input.name,
-          },
-        })
-        result.success = true
-        result.user = user
+        try {
+          const sameEmail = await ctx.prisma.user.findUnique({
+            where: { email: args.input.email },
+          })
+          if (sameEmail) {
+            result.success = false
+            result.message = 'A user with that email already exists'
+          } else {
+            const user = await ctx.prisma.user.create({
+              data: {
+                email: args.input.email,
+                password: hashedPassword,
+                name: args.input.name,
+              },
+            })
+            result.success = true
+            result.user = user
+          }
+        } catch (error) {
+          result.success = false
+          result.message = error.message
+        }
       } else {
         result.success = false
         result.message = 'Email not valid'
