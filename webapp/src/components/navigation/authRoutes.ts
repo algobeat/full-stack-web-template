@@ -1,15 +1,16 @@
-import Filler from "../../pages/Filler";
 import { Route } from "./appRoutes";
+import Login from "../../pages/Login";
+import Register from "../../pages/Register";
 
 const authRoutes: Route[] = [
   {
     path: "login/",
-    component: Filler,
+    component: Login,
     name: "Login",
   },
   {
     path: "register/",
-    component: Filler,
+    component: Register,
     name: "Register",
   },
 ];

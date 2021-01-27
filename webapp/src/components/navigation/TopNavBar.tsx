@@ -33,7 +33,7 @@ export function TopNavBar(props: TopNavBarProps) {
           <MenuIcon />
         </ResponsiveMenuButton>
         <Typography variant={"h6"} noWrap>
-          Algobeat - Algorithm training assistant
+          Website
         </Typography>
       </Toolbar>
     </DominantAppBar>

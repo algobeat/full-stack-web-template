@@ -4,7 +4,9 @@ import { RequestParameters } from "relay-runtime/lib/util/RelayConcreteNode";
 import { Variables } from "relay-runtime/lib/util/RelayRuntimeTypes";
 
 function fetchQuery(operation: RequestParameters, variables: Variables) {
-  return fetch("http://localhost:4000/graphql", {
+  // Configure your setup to reverse proxy the /graphql path to the backend.
+  // We then send credentials using cookies.
+  return fetch("/graphql", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -13,6 +15,7 @@ function fetchQuery(operation: RequestParameters, variables: Variables) {
       query: operation.text,
       variables,
     }),
+    credentials: "include",
   }).then((response) => {
     return response.json();
   });

@@ -4,6 +4,7 @@ import { typeDefs, resolvers } from './schema'
 import { createContext } from './context'
 import cookieParser from 'cookie-parser'
 import express from 'express'
+import * as path from 'path'
 
 dotenv.config()
 
@@ -13,6 +14,12 @@ app.use(cookieParser())
 
 const server = new ApolloServer({ typeDefs, resolvers, context: createContext })
 server.applyMiddleware({ app })
+
+app.use(express.static(path.join(__dirname, '../../build')))
+
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, '../../build', 'index.html'))
+})
 
 app.listen({ port: 4000 }, () =>
   console.log(

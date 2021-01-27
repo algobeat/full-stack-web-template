@@ -7,6 +7,7 @@ import appRoutes from "./components/navigation/appRoutes";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import AuthLayout from "./components/layout/AuthLayout";
 import authRoutes from "./components/navigation/authRoutes";
+import { SnackbarProvider } from "notistack";
 
 const customTheme = createMuiTheme({});
 
@@ -14,31 +15,41 @@ function App() {
   return (
     <MuiThemeProvider theme={customTheme}>
       <ThemeProvider theme={customTheme}>
-        <Router>
-          <Switch>
-            <Route path={"/auth/:path?"} exact>
-              <AuthLayout>
-                {authRoutes.map((r) => {
-                  return (
-                    <Route path={"/auth/" + r.path} component={r.component} />
-                  );
-                })}
-              </AuthLayout>
-            </Route>
-
-            <Route path={"/"}>This should stay</Route>
-
-            <Route>
-              <AppLayout>
-                <Switch>
-                  {appRoutes.map((r) => {
-                    return <Route path={r.path} component={r.component} />;
+        <SnackbarProvider maxSnack={3}>
+          <Router>
+            <Switch>
+              <Route path={"/auth/:path?"} exact>
+                <AuthLayout>
+                  {authRoutes.map((r) => {
+                    return (
+                      <Route
+                        path={"/auth/" + r.path}
+                        component={r.component}
+                        exact={r.exact}
+                      />
+                    );
                   })}
-                </Switch>
-              </AppLayout>
-            </Route>
-          </Switch>
-        </Router>
+                </AuthLayout>
+              </Route>
+
+              <Route>
+                <AppLayout>
+                  <Switch>
+                    {appRoutes.map((r) => {
+                      return (
+                        <Route
+                          path={r.path}
+                          component={r.component}
+                          exact={r.exact}
+                        />
+                      );
+                    })}
+                  </Switch>
+                </AppLayout>
+              </Route>
+            </Switch>
+          </Router>
+        </SnackbarProvider>
       </ThemeProvider>
     </MuiThemeProvider>
   );
