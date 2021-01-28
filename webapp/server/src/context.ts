@@ -1,8 +1,8 @@
-import { PrismaClient, User } from '@prisma/client'
+import { PrismaClient, User, Session } from '@prisma/client'
 import { ContextFunction } from 'apollo-server-core'
 import { ExpressContext } from 'apollo-server-express/src/ApolloServer'
 import { Request, Response } from 'express'
-import { createJWT, decodeJWT, renewJWT } from './utils'
+import { createJWT, decodeJWT, renewJWT, sleep } from './utils'
 
 const prisma = new PrismaClient()
 
@@ -13,22 +13,64 @@ export interface Context {
   res: Response
 }
 
+export async function startRemovingExpiredSessions() {
+  while (true) {
+    // Every 2 minutes, prune expired sessions.
+    await sleep(2 * 60 * 1000)
+    try {
+      await prisma.session.deleteMany({
+        where: { expires: { lte: new Date() } },
+      })
+    } catch (e) {
+      console.log('exception while pruning sessions: ' + e.message)
+    }
+  }
+}
+
 export async function createContext(args: ExpressContext): Promise<Context> {
   const ctx: Context = { prisma, req: args.req, res: args.res }
 
-  if (args.req.cookies && args.req.cookies.authorization) {
-    const payload = decodeJWT(args.req.cookies.authorization)
+  if (
+    args.req.cookies &&
+    (args.req.cookies.authorization || args.req.cookies.refreshToken)
+  ) {
+    const payload = args.req.cookies.authorization
+      ? decodeJWT(args.req.cookies.authorization)
+      : undefined
 
-    if (payload && payload.valid) {
-      const user = await prisma.user.findUnique({
-        where: { email: payload.email },
-      })
-      if (user) {
-        ctx.user = user
+    let refreshSession: Session | undefined = undefined
+
+    if (
+      (payload && !payload.active) ||
+      (!payload && args.req.cookies.refreshToken)
+    ) {
+      // check for refresh token
+      if (args.req.cookies.refreshToken) {
+        const session = await ctx.prisma.session.findUnique({
+          where: { token: args.req.cookies.refreshToken },
+        })
+        if (session && session.expires > new Date()) {
+          refreshSession = session
+        }
       }
+    }
 
-      if (payload.shouldRefresh) {
+    if (payload && payload.active) {
+      ctx.user =
+        (await prisma.user.findUnique({
+          where: { email: payload.email },
+        })) || undefined
+
+      if (payload.shouldRefresh || !payload.active) {
         renewJWT(payload.email, ctx.res)
+      }
+    } else if (refreshSession) {
+      ctx.user =
+        (await prisma.user.findUnique({
+          where: { id: refreshSession.userId },
+        })) || undefined
+      if (ctx.user) {
+        renewJWT(ctx.user.email, ctx.res)
       }
     }
   }

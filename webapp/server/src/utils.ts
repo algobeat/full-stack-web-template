@@ -16,15 +16,12 @@ export interface JWTPayload {
   email: string
   expires: number
   expiresDate: Date
-  valid: boolean
+  active: boolean
   shouldRefresh: boolean
 }
 
-// 24 hour expiry default.
-export function createJWT(
-  email: string,
-  expiresIn: number = 24 * 60 * 60 * 1000,
-) {
+// 20 minute expiry by default
+export function createJWT(email: string, expiresIn: number = 20 * 60 * 1000) {
   return jwt.sign(
     { email, expires: Date.now() + expiresIn },
     process.env.AUTH_SIGN_SECRET!,
@@ -41,25 +38,18 @@ export function decodeJWT(token: string): JWTPayload | null {
   payload.expiresDate = new Date(payload.expires)
 
   if (payload && payload.expires > Date.now()) {
-    payload.valid = true
-    payload.shouldRefresh = payload.expires < Date.now() + 1 * 60 * 60 * 1000 // 12 hour until expiry = refresh.
+    payload.active = true
+    payload.shouldRefresh = payload.expires < Date.now() + 15 * 60 * 1000 // 15 min until expiry? then refresh.
   } else {
-    payload.valid = false
+    payload.active = false
   }
 
   return payload
 }
 
-export function renewJWT(
-  email: string,
-  res: express.Response,
-  rememberMe?: boolean,
-) {
+export function renewJWT(email: string, res: express.Response) {
   // 1 month expiry if remember me, otherwise default.
-  const token = createJWT(
-    email,
-    rememberMe ? 31 * 24 * 60 * 60 * 1000 : undefined,
-  )
+  const token = createJWT(email)
   const payload = decodeJWT(token)
   res.cookie('authorization', token, {
     httpOnly: true,
@@ -70,4 +60,10 @@ export function renewJWT(
 
 export function clearJWT(res: express.Response) {
   res.clearCookie('authorization')
+}
+
+export async function sleep(ms: number) {
+  return new Promise((res, rej) => {
+    setTimeout(res, ms)
+  })
 }

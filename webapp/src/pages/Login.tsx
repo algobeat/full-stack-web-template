@@ -123,7 +123,7 @@ export default function Login() {
             <FormControlLabel
               control={
                 <Checkbox
-                  value="remember"
+                  name="rememberMe"
                   color="primary"
                   inputRef={register}
                 />

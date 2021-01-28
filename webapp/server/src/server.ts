@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import { ApolloServer } from 'apollo-server-express'
 import { typeDefs, resolvers } from './schema'
-import { createContext } from './context'
+import { createContext, startRemovingExpiredSessions } from './context'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import * as path from 'path'
@@ -20,6 +20,8 @@ app.use(express.static(path.join(__dirname, '../../build')))
 app.get('*', function (req, res) {
   res.sendFile(path.join(__dirname, '../../build', 'index.html'))
 })
+
+startRemovingExpiredSessions()
 
 app.listen({ port: 4000 }, () =>
   console.log(

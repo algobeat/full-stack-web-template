@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken'
 import { gql } from 'apollo-server'
 import { clearJWT, createJWT, decodeJWT, renewJWT } from '../utils'
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
+import { promisify } from 'util'
 
 export const loginTypeDefs = gql`
   extend type Query {
@@ -25,6 +27,7 @@ export const loginTypeDefs = gql`
     message: String
     user: User
     token: String
+    refresh: String
   }
 
   type LogoutPayload implements Payload {
@@ -59,12 +62,37 @@ export const loginResolvers = {
 
       const result = await bcrypt.compare(args.input.password, user.password)
       if (result) {
-        const token = renewJWT(user.email, ctx.res, args.input.rememberMe)
-        return {
+        const token = renewJWT(user.email, ctx.res)
+
+        const payload = {
           success: true,
           user: user,
           token,
-        }
+        } as any
+
+        // persist a refresh session token too
+        const expiryIn = args.input.rememberMe
+          ? 31 * 24 * 60 * 60 * 1000 // 1 month
+          : 1 * 24 * 60 * 60 * 1000 // 1 day
+        const refreshTokenBytes = await promisify(
+          crypto.randomBytes.bind(null, 48),
+        )()
+        const refreshToken = refreshTokenBytes.toString('hex')
+        const refreshExpiry = new Date(Date.now() + expiryIn)
+        await ctx.prisma.session.create({
+          data: {
+            user: { connect: { email: user.email } },
+            token: refreshToken,
+            expires: refreshExpiry,
+          },
+        })
+        payload.refreshToken = refreshToken
+        ctx.res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          expires: refreshExpiry,
+        })
+
+        return payload
       } else {
         return {
           success: false,
@@ -81,6 +109,18 @@ export const loginResolvers = {
         }
       }
       clearJWT(ctx.res)
+
+      // clear his refresh token
+      if (ctx.req.cookies && ctx.req.cookies.refreshToken) {
+        const token = ctx.req.cookies.refreshToken
+        const session = await ctx.prisma.session.findUnique({
+          where: { token },
+        })
+        if (session && session.userId === ctx.user.id) {
+          await ctx.prisma.session.delete({ where: { token } })
+        }
+      }
+
       return {
         success: true,
       }
