@@ -16,6 +16,10 @@ import { useForm } from "react-hook-form";
 import { registerUserMutation } from "../api/mutations/register";
 import environment from "../relayEnvironment";
 import { useSnackbar } from "notistack";
+import {
+  validateEmail,
+  validatePassword,
+} from "../../server/src/validation/user.validation";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -41,7 +45,7 @@ export default function Register() {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, errors, watch } = useForm();
   const history = useHistory();
 
   const onSubmit = async (data: any) => {
@@ -73,6 +77,12 @@ export default function Register() {
     }
   };
 
+  const validateConfirmPassword = (data: string) => {
+    if (data !== watch("password")) {
+      return "Password does not match";
+    }
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -94,6 +104,7 @@ export default function Register() {
                 fullWidth
                 id="name"
                 label="Name"
+                error={!!errors.name}
                 autoFocus
                 inputRef={register({ required: true })}
               />
@@ -106,8 +117,10 @@ export default function Register() {
                 id="email"
                 label="Email Address"
                 name="email"
+                error={!!errors.email}
                 autoComplete="email"
-                inputRef={register({ required: true })}
+                type={"email"}
+                inputRef={register({ required: true, validate: validateEmail })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -120,12 +133,11 @@ export default function Register() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                error={!!errors.password}
+                helperText={errors.password?.message}
                 inputRef={register({
                   required: true,
-                  validate: (v: string) =>
-                    v.length >= 8
-                      ? true
-                      : "Password must be at least 8 characters",
+                  validate: validatePassword,
                 })}
               />
             </Grid>
@@ -135,10 +147,15 @@ export default function Register() {
                 required
                 fullWidth
                 name="confirmPassword"
-                label="Password"
+                label="Confirm password"
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword?.message}
                 type="password"
                 id="confirmPassword"
-                inputRef={register({ required: true })}
+                inputRef={register({
+                  required: true,
+                  validate: validateConfirmPassword,
+                })}
               />
             </Grid>
           </Grid>
