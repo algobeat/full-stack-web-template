@@ -19,7 +19,7 @@ import { useSnackbar } from "notistack";
 import {
   validateEmail,
   validatePassword,
-} from "../../server/src/validation/user.validation";
+} from "../api/validation/user.validation";
 
 const useStyles = makeStyles((theme) => ({
   paper: {

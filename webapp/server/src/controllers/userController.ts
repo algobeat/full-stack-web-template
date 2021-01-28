@@ -4,6 +4,12 @@ import isEmail from 'isemail'
 import { FindManyUserArgs } from '@prisma/client'
 import { decodeGlobalId, encodeGlobalId } from '../utils'
 import bcrypt from 'bcrypt'
+import {
+  validateEmail,
+  validatePassword,
+} from '../../../src/api/validation/user.validation'
+import { isAccepted } from '../../../src/api/validation'
+import { isValidElement } from 'react'
 
 export const userTypeDefs = gql`
   enum UserRole {
@@ -116,7 +122,13 @@ export const userResolvers = {
     signupUser: async (parent, args, ctx: Context) => {
       const result: any = { clientMutationId: args.input.clientMutationId }
 
-      if (isEmail.validate(args.input.email)) {
+      if (!isAccepted(validatePassword(args.input.password))) {
+        result.success = false
+        result.message = validatePassword(args.input.password)
+      } else if (!isAccepted(validateEmail(args.input.email))) {
+        result.success = false
+        result.message = validateEmail(args.input.email)
+      } else {
         const hashedPassword = await bcrypt.hash(args.input.password, 10)
         try {
           const sameEmail = await ctx.prisma.user.findUnique({
@@ -140,9 +152,6 @@ export const userResolvers = {
           result.success = false
           result.message = error.message
         }
-      } else {
-        result.success = false
-        result.message = 'Email not valid'
       }
 
       return result
