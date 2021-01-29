@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Sidebar } from "../navigation/Sidebar";
-import { TopNavBar } from "../navigation/TopNavBar";
+import TopNavBar from "../navigation/TopNavBar";
 import styled from "styled-components";
 import { Toolbar, Typography } from "@material-ui/core";
 import { QueryRenderer, RelayProp } from "react-relay";
@@ -44,7 +44,7 @@ function AppLayoutComponent(props: AppLayoutProps) {
 
   return (
     <Root>
-      <TopNavBar drawerToggle={handleDrawerToggle} />
+      <TopNavBar drawerToggle={handleDrawerToggle} me={props.props.me} />
       <Sidebar
         handleDrawerToggle={handleDrawerToggle}
         mobileOpen={mobileOpen}
@@ -67,6 +67,7 @@ export function AppLayout(props: { children: React.ReactNode }) {
             role
             email
             name
+            ...TopNavBar_me
           }
         }
       `}

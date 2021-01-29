@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useMemo } from "react";
 import {
+  Collapse,
   Divider,
   Drawer,
   Hidden,
@@ -10,9 +12,14 @@ import {
   Toolbar,
 } from "@material-ui/core";
 import styled from "styled-components";
-import appRoutes from "./appRoutes";
+import appRoutes, { ParentRoute } from "./appRoutes";
 import { useHistory, useLocation } from "react-router-dom";
-import { ExitToApp } from "@material-ui/icons";
+import {
+  ExitToApp,
+  ExpandLess,
+  ExpandMore,
+  StarBorder,
+} from "@material-ui/icons";
 import environment from "../../relayEnvironment";
 import { logoutMutation } from "../../api/mutations/logout";
 import { pathsMatch } from "../../utils";
@@ -36,9 +43,71 @@ const DrawerContainer = styled.div`
   overflow: auto;
 `;
 
+const NestedListItem = styled(ListItem)`
+  padding-left: ${({ theme }) => theme.spacing(4)};
+`;
+
 export interface SidebarProps {
   mobileOpen: boolean;
   handleDrawerToggle: () => any;
+}
+
+interface NestedMenuItemProps {
+  route: ParentRoute;
+}
+
+function NestedMenuItem(props: NestedMenuItemProps) {
+  const location = useLocation();
+
+  const matched = useMemo(() => {
+    for (const c of props.route.children) {
+      if (pathsMatch(c.path, location.pathname, c.exact)) {
+        return true;
+      }
+    }
+    return false;
+  }, [props.route.children, location.pathname]);
+
+  const [open, setOpen] = React.useState(matched);
+  const history = useHistory();
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
+  const RouteIcon = props.route.icon;
+  return (
+    <React.Fragment>
+      <ListItem button onClick={handleClick} selected={matched}>
+        <ListItemIcon>{RouteIcon && <RouteIcon />}</ListItemIcon>
+        <ListItemText primary={props.route.name} />
+        {open ? <ExpandLess /> : <ExpandMore />}
+      </ListItem>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {props.route.children.map((c) => {
+            const ChildIcon = c.icon;
+            const matched = pathsMatch(c.path, location.pathname, c.exact);
+            return (
+              <NestedListItem
+                button
+                onClick={() => history.push(c.path)}
+                selected={matched}
+              >
+                {ChildIcon && <ListItemIcon>{<ChildIcon />}</ListItemIcon>}
+                <ListItemText primary={c.name} />
+              </NestedListItem>
+            );
+          })}
+          <NestedListItem button>
+            <ListItemIcon>
+              <StarBorder />
+            </ListItemIcon>
+            <ListItemText primary="Starred" />
+          </NestedListItem>
+        </List>
+      </Collapse>
+    </React.Fragment>
+  );
 }
 
 export function Sidebar(props: SidebarProps) {
@@ -53,27 +122,40 @@ export function Sidebar(props: SidebarProps) {
     <React.Fragment>
       <Toolbar />
       <DrawerContainer>
-        <List>
-          {appRoutes.map((r) => {
-            const Icon = r.icon!;
-            const matched = pathsMatch(r.path, location.pathname, r.exact);
+        {appRoutes.map((r) => (
+          <React.Fragment>
+            <List>
+              {r.map((rr) => {
+                if (rr.children) {
+                  // collapsible nested menu
+                  return <NestedMenuItem route={rr} />;
+                } else {
+                  const Icon = rr.icon!;
+                  const matched = pathsMatch(
+                    rr.path,
+                    location.pathname,
+                    rr.exact
+                  );
 
-            return (
-              <ListItem
-                button
-                onClick={() => history.push(r.path)}
-                selected={matched}
-                key={r.name}
-              >
-                <ListItemIcon>
-                  <Icon />
-                </ListItemIcon>
-                <ListItemText primary={r.name} />
-              </ListItem>
-            );
-          })}
-        </List>
-        <Divider />
+                  return (
+                    <ListItem
+                      button
+                      onClick={() => history.push(rr.path)}
+                      selected={matched}
+                      key={rr.name}
+                    >
+                      <ListItemIcon>
+                        <Icon />
+                      </ListItemIcon>
+                      <ListItemText primary={rr.name} />
+                    </ListItem>
+                  );
+                }
+              })}
+            </List>
+            <Divider />
+          </React.Fragment>
+        ))}
         <List>
           <ListItem button onClick={handleLogoutClick} key={"Logout"}>
             <ListItemIcon>

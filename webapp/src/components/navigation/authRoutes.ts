@@ -1,8 +1,8 @@
-import { Route } from "./appRoutes";
+import { RootRoute } from "./appRoutes";
 import Login from "../../pages/Login";
 import Register from "../../pages/Register";
 
-const authRoutes: Route[] = [
+const authRoutes: RootRoute[] = [
   {
     path: "login/",
     component: Login,

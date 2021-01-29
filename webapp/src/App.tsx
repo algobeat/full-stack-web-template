@@ -35,15 +35,30 @@ function App() {
               <Route>
                 <AppLayout>
                   <Switch>
-                    {appRoutes.map((r) => {
-                      return (
-                        <Route
-                          path={r.path}
-                          component={r.component}
-                          exact={r.exact}
-                        />
-                      );
-                    })}
+                    {appRoutes.map((r) =>
+                      r.map((rr) => {
+                        if (rr.children) {
+                          // this is a nested menu item
+                          return rr.children.map((c) => {
+                            return (
+                              <Route
+                                path={c.path}
+                                component={c.component}
+                                exact={c.exact}
+                              />
+                            );
+                          });
+                        } else {
+                          return (
+                            <Route
+                              path={rr.path}
+                              component={rr.component}
+                              exact={rr.exact}
+                            />
+                          );
+                        }
+                      })
+                    )}
                   </Switch>
                 </AppLayout>
               </Route>

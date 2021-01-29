@@ -69,19 +69,12 @@ export default createPaginationContainer(
       return props.users && props.users.users;
     },
     getFragmentVariables(prevVars, totalCount) {
-      console.log(
-        "getting fragment variables variables: " +
-          JSON.stringify(prevVars) +
-          " " +
-          totalCount
-      );
       return {
         ...prevVars,
         count: totalCount,
       };
     },
     getVariables(props, { count, cursor }, fragmentVariables) {
-      console.log("initial variables: " + count + " " + cursor);
       return {
         count,
         cursor,
