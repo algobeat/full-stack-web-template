@@ -14,6 +14,7 @@ import { graphql } from "babel-plugin-relay/macro";
 import { TopNavBar_me } from "./__generated__/TopNavBar_me.graphql";
 import Button from "@material-ui/core/Button";
 import { AccountCircle, ExpandMore } from "@material-ui/icons";
+import { useHistory } from "react-router-dom";
 
 const DominantAppBar = styled(AppBar)`
   z-index: 1201 !important;
@@ -41,6 +42,7 @@ function TopNavBarComponent(props: TopNavBarProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
+  const history = useHistory();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -48,6 +50,11 @@ function TopNavBarComponent(props: TopNavBarProps) {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (path: string) => {
+    handleClose();
+    history.push(path);
   };
 
   return (
@@ -87,8 +94,16 @@ function TopNavBarComponent(props: TopNavBarProps) {
               open={open}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem
+                onClick={handleMenuItemClick.bind(null, "/settings/profile/")}
+              >
+                Profile
+              </MenuItem>
+              <MenuItem
+                onClick={handleMenuItemClick.bind(null, "/settings/account/")}
+              >
+                My account
+              </MenuItem>
             </Menu>
           </React.Fragment>
         ) : (

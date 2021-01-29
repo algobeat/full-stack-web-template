@@ -14,12 +14,7 @@ import {
 import styled from "styled-components";
 import appRoutes, { ParentRoute } from "./appRoutes";
 import { useHistory, useLocation } from "react-router-dom";
-import {
-  ExitToApp,
-  ExpandLess,
-  ExpandMore,
-  StarBorder,
-} from "@material-ui/icons";
+import { ExitToApp, ExpandLess, ExpandMore } from "@material-ui/icons";
 import environment from "../../relayEnvironment";
 import { logoutMutation } from "../../api/mutations/logout";
 import { pathsMatch } from "../../utils";
@@ -44,7 +39,9 @@ const DrawerContainer = styled.div`
 `;
 
 const NestedListItem = styled(ListItem)`
-  padding-left: ${({ theme }) => theme.spacing(4)};
+  &&& {
+    padding-left: ${({ theme }) => theme.spacing(4)}px;
+  }
 `;
 
 export interface SidebarProps {
@@ -93,17 +90,15 @@ function NestedMenuItem(props: NestedMenuItemProps) {
                 onClick={() => history.push(c.path)}
                 selected={matched}
               >
-                {ChildIcon && <ListItemIcon>{<ChildIcon />}</ListItemIcon>}
+                {ChildIcon ? (
+                  <ListItemIcon>{<ChildIcon />}</ListItemIcon>
+                ) : (
+                  <ListItemIcon></ListItemIcon>
+                )}
                 <ListItemText primary={c.name} />
               </NestedListItem>
             );
           })}
-          <NestedListItem button>
-            <ListItemIcon>
-              <StarBorder />
-            </ListItemIcon>
-            <ListItemText primary="Starred" />
-          </NestedListItem>
         </List>
       </Collapse>
     </React.Fragment>
