@@ -74,9 +74,7 @@ export const loginResolvers = {
         const expiryIn = args.input.rememberMe
           ? 31 * 24 * 60 * 60 * 1000 // 1 month
           : 1 * 24 * 60 * 60 * 1000 // 1 day
-        const refreshTokenBytes = await promisify(
-          crypto.randomBytes.bind(null, 48),
-        )()
+        const refreshTokenBytes = crypto.randomBytes(48)
         const refreshToken = refreshTokenBytes.toString('hex')
         const refreshExpiry = new Date(Date.now() + expiryIn)
         await ctx.prisma.session.create({
@@ -119,6 +117,7 @@ export const loginResolvers = {
         if (session && session.userId === ctx.user.id) {
           await ctx.prisma.session.delete({ where: { token } })
         }
+        ctx.res.clearCookie('refreshToken')
       }
 
       return {

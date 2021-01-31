@@ -17,7 +17,9 @@ import { AccountCircle, ExpandMore } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 
 const DominantAppBar = styled(AppBar)`
-  z-index: 1201 !important;
+  &&& {
+    z-index: 1201;
+  }
 `;
 
 const ResponsiveMenuButton = styled(IconButton)`

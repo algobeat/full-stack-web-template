@@ -87,7 +87,7 @@ function NestedMenuItem(props: NestedMenuItemProps) {
             return (
               <NestedListItem
                 button
-                onClick={() => history.push(c.path)}
+                onClick={() => history.push(c.link || c.path)}
                 selected={matched}
               >
                 {ChildIcon ? (
@@ -135,7 +135,7 @@ export function Sidebar(props: SidebarProps) {
                   return (
                     <ListItem
                       button
-                      onClick={() => history.push(rr.path)}
+                      onClick={() => history.push(rr.link || rr.path)}
                       selected={matched}
                       key={rr.name}
                     >

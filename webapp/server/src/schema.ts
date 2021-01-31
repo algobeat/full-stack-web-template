@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server'
 import { userResolvers, userTypeDefs } from './controllers/userController'
 import * as _ from 'lodash'
-import { loginResolvers, loginTypeDefs } from './controllers/login'
+import { loginResolvers, loginTypeDefs } from './controllers/loginController'
 
 export const rootTypeDefs = gql`
   interface Node {

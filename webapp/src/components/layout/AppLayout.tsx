@@ -18,7 +18,7 @@ const Root = styled.div`
 `;
 
 const Content = styled.div`
-  flexgrow: 1;
+  flex-grow: 1;
   padding: 24px;
 `;
 

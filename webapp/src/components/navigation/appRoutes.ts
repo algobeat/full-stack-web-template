@@ -2,9 +2,11 @@ import Filler from "../../pages/Filler";
 import * as React from "react";
 import UsersPage from "../../pages/UsersPage";
 import { Home, People, Settings, SvgIconComponent } from "@material-ui/icons";
+import AccountSettingsPage from "../../pages/AccountSettingsPage";
 
 export interface RootRoute {
   path: string;
+  link?: string;
   component: () => React.ReactElement;
   name: string;
   inSidebar?: boolean;
@@ -21,6 +23,7 @@ export interface ParentRoute {
 
 export interface ChildRoute {
   path: string;
+  link?: string;
   component: () => React.ReactElement;
   name: string;
   exact?: boolean;
@@ -54,14 +57,17 @@ const appRoutes: Route[][] = [
       icon: Settings,
       children: [
         {
-          path: "/settings/profile/",
+          // without ID assumes one's own user
+          path: "/settings/profile/:userId?",
           name: "Profile",
           component: Filler,
         },
         {
-          path: "/settings/account/",
+          // without ID assumes one's own user
+          path: "/settings/account/:userId?",
+          link: "/settings/account/",
           name: "Account",
-          component: Filler,
+          component: AccountSettingsPage,
         },
       ],
     },

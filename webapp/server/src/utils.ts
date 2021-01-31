@@ -9,6 +9,7 @@ export function encodeGlobalId(type: string, id: string) {
 export function decodeGlobalId(globalId: string) {
   const decoded = Buffer.from(globalId, 'base64').toString('binary')
   const [type, id] = decoded.split('_')
+
   return { type, id }
 }
 

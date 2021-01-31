@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server'
 import { Context } from '../context'
-import isEmail from 'isemail'
-import { FindManyUserArgs } from '@prisma/client'
+import { FindManyUserArgs, User } from '@prisma/client'
 import { decodeGlobalId, encodeGlobalId } from '../utils'
 import bcrypt from 'bcrypt'
 import {
@@ -9,7 +8,8 @@ import {
   validatePassword,
 } from '../../../src/api/validation/user.validation'
 import { isAccepted } from '../../../src/api/validation'
-import { isValidElement } from 'react'
+import crypto from 'crypto'
+import { PrismaClient } from '@prisma/client'
 
 export const userTypeDefs = gql`
   enum UserRole {
@@ -18,10 +18,12 @@ export const userTypeDefs = gql`
   }
 
   type User implements Node {
-    email: String!
+    email: String
     id: ID!
     name: String
-    role: UserRole
+    role: UserRole!
+
+    emailConfirmed: Boolean
   }
 
   type UserEdge {
@@ -36,26 +38,70 @@ export const userTypeDefs = gql`
 
   extend type Query {
     users(after: ID, before: ID, first: Int): UserConnection
+    user(id: ID): User
   }
 
   extend type Mutation {
     signupUser(input: UserCreateInput!): SignUpPayload
+    changePassword(input: ChangePasswordInput!): ChangePasswordPayload
+    editProfile(input: EditProfileInput!): EditProfilePayload
+  }
+
+  input ChangePasswordInput {
+    id: ID
+    currentPassword: String!
+    newPassword: String!
+  }
+
+  type ChangePasswordPayload {
+    success: Boolean!
+    message: String
   }
 
   input UserCreateInput {
     email: String!
     name: String
     password: String!
-    clientMutationId: String
   }
 
   type SignUpPayload {
     user: User
     success: Boolean!
     message: String
-    clientMutationId: String
+  }
+
+  input EditProfileInput {
+    id: ID
+    email: String
+    name: String
+    role: UserRole
+  }
+
+  type EditProfilePayload {
+    user: User
+    success: Boolean!
+    message: String
   }
 `
+
+// Assumes auth checks have been done.
+async function invalidateAndSendEmailConfirmation(
+  user: User,
+  prisma: PrismaClient,
+) {
+  const newToken = crypto.randomBytes(48).toString()
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailConfirmationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day expiry
+      emailConfirmationToken: newToken,
+      emailConfirmed: false,
+    },
+  })
+
+  // TODO: Use your email API to send the user their confirmation email.
+}
 
 export const userResolvers = {
   Query: {
@@ -117,6 +163,18 @@ export const userResolvers = {
 
       return result
     },
+
+    user: async (parent, args, ctx: Context) => {
+      let userId = ctx.user?.id
+      if (args.id) {
+        const providedId = decodeGlobalId(args.id)
+        if (providedId.type !== 'User') {
+          return null
+        }
+        userId = Number(providedId.id)
+      }
+      return await ctx.prisma.user.findUnique({ where: { id: userId } })
+    },
   },
   Mutation: {
     signupUser: async (parent, args, ctx: Context) => {
@@ -147,6 +205,8 @@ export const userResolvers = {
             })
             result.success = true
             result.user = user
+
+            await invalidateAndSendEmailConfirmation(user, ctx.prisma)
           }
         } catch (error) {
           result.success = false
@@ -156,10 +216,131 @@ export const userResolvers = {
 
       return result
     },
+
+    changePassword: async (parent, args, ctx: Context) => {
+      if (!ctx.user) {
+        return { success: false, message: 'You must be logged in to do this' }
+      }
+
+      let targetUserId = ctx.user.id
+      if (args.id) {
+        const providedId = decodeGlobalId(args.id)
+        if (providedId.type !== 'User') {
+          return { success: false, message: 'Provided user ID is invalid' }
+        }
+        targetUserId = Number(providedId.id)
+      }
+
+      // only admin or the user himself can change password
+      if (ctx.user.role === 'ADMIN' || ctx.user.id === targetUserId) {
+        const user = await ctx.prisma.user.findUnique({
+          where: { id: targetUserId },
+        })
+        if (!user) {
+          return { success: false, message: 'User not found' }
+        }
+        const passwordCheck = await bcrypt.compare(
+          args.input.currentPassword,
+          user.password,
+        )
+        if (!passwordCheck) {
+          return { success: false, message: 'Current password incorrect' }
+        }
+
+        if (!isAccepted(validatePassword(args.input.newPassword))) {
+          return {
+            success: false,
+            message: validatePassword(args.input.newPassword),
+          }
+        }
+
+        await ctx.prisma.user.update({
+          where: { id: targetUserId },
+          data: { password: await bcrypt.hash(args.input.newPassword, 10) },
+        })
+
+        return { success: true }
+      } else {
+        return { success: false, message: 'Permission denied' }
+      }
+    },
+
+    editProfile: async (parent, args, ctx: Context) => {
+      console.log('Edit profile args:')
+      console.log(args)
+      if (!ctx.user) {
+        return { success: false, message: 'You must be logged in to do this' }
+      }
+
+      let targetUserId = ctx.user.id
+      if (args.id) {
+        const providedId = decodeGlobalId(args.id)
+        if (providedId.type !== 'User') {
+          return { success: false, message: 'Provided user ID is invalid' }
+        }
+        targetUserId = Number(providedId.id)
+      }
+
+      // only admin or the user himself can change profile
+      if (ctx.user.role === 'ADMIN' || ctx.user.id === targetUserId) {
+        const user = await ctx.prisma.user.findUnique({
+          where: { id: targetUserId },
+        })
+
+        if (!user) {
+          return { success: false, message: 'user not found' }
+        }
+
+        if (args.input.email && !isAccepted(validateEmail(args.input.email))) {
+          return { success: false, message: validateEmail(args.input.email) }
+        }
+
+        const newUser = await ctx.prisma.user.update({
+          where: { id: targetUserId },
+          data: {
+            email: args.input.email || undefined,
+            name: args.input.name || undefined,
+          },
+        })
+
+        if (args.input.email) {
+          await invalidateAndSendEmailConfirmation(user, ctx.prisma)
+        }
+
+        return {
+          success: true,
+          user: newUser,
+        }
+      }
+    },
   },
   User: {
     id: (parent) => {
       return encodeGlobalId('User', parent.id)
+    },
+
+    emailConfirmed: (parent, args, ctx: Context) => {
+      // Only admins or the user himself can see their email confirmation status
+      if (
+        ctx.user &&
+        (ctx.user.id === parent.id || ctx.user.role === 'ADMIN')
+      ) {
+        return parent.emailConfirmed
+      } else {
+        return null
+      }
+    },
+
+    email: (parent, args, ctx: Context) => {
+      // Only admins or the user himself can see their email
+      if (
+        ctx.user &&
+        (ctx.user.id === parent.id || ctx.user.role === 'ADMIN')
+      ) {
+        return parent.email
+      } else {
+        return null
+      }
     },
   },
 }
