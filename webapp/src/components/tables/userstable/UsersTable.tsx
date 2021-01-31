@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, Card, CardContent } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import { createPaginationContainer, RelayPaginationProp } from "react-relay";
 import { graphql } from "babel-plugin-relay/macro";
 import { UsersTable_users } from "./__generated__/UsersTable_users.graphql";
@@ -17,23 +17,19 @@ function UserTable(props: UsersTableProps) {
 
   return (
     <React.Fragment>
-      <Card>
-        <CardContent>
-          {props.users.users.edges.map((u) =>
-            u && u.node ? (
-              <UserCard user={u.node} key={u.node.email} />
-            ) : (
-              <p>Loading...</p>
-            )
-          )}
-          <Button
-            disabled={!props.relay.hasMore()}
-            onClick={() => !props.relay.isLoading() && props.relay.loadMore(2)}
-          >
-            Load more
-          </Button>
-        </CardContent>
-      </Card>
+      {props.users.users.edges.map((u) =>
+        u && u.node ? (
+          <UserCard user={u.node} key={u.node.email} />
+        ) : (
+          <p>Loading...</p>
+        )
+      )}
+      <Button
+        disabled={!props.relay.hasMore()}
+        onClick={() => !props.relay.isLoading() && props.relay.loadMore(2)}
+      >
+        Load more
+      </Button>
     </React.Fragment>
   );
 }

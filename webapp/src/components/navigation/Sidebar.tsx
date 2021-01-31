@@ -125,6 +125,9 @@ export function Sidebar(props: SidebarProps) {
                   // collapsible nested menu
                   return <NestedMenuItem route={rr} />;
                 } else {
+                  if (rr.inSidebar === false) {
+                    return null;
+                  }
                   const Icon = rr.icon!;
                   const matched = pathsMatch(
                     rr.path,

@@ -73,6 +73,15 @@ const appRoutes: Route[][] = [
         },
       ],
     },
+
+    // hidden routes
+    {
+      // without ID assumes one's own user
+      path: "/user/:userId/",
+      name: "user",
+      inSidebar: false,
+      component: ProfilePage,
+    },
   ],
 ];
 
