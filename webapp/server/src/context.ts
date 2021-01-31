@@ -58,11 +58,11 @@ export async function createContext(args: ExpressContext): Promise<Context> {
     if (payload && payload.active) {
       ctx.user =
         (await prisma.user.findUnique({
-          where: { email: payload.email },
+          where: { id: payload.userId },
         })) || undefined
 
       if (payload.shouldRefresh || !payload.active) {
-        renewJWT(payload.email, ctx.res)
+        renewJWT(payload.userId, ctx.res)
       }
     } else if (refreshSession) {
       ctx.user =
@@ -70,7 +70,7 @@ export async function createContext(args: ExpressContext): Promise<Context> {
           where: { id: refreshSession.userId },
         })) || undefined
       if (ctx.user) {
-        renewJWT(ctx.user.email, ctx.res)
+        renewJWT(ctx.user.id, ctx.res)
       }
     }
   }

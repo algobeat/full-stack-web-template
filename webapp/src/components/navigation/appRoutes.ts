@@ -3,6 +3,7 @@ import * as React from "react";
 import UsersPage from "../../pages/UsersPage";
 import { Home, People, Settings, SvgIconComponent } from "@material-ui/icons";
 import AccountSettingsPage from "../../pages/AccountSettingsPage";
+import ProfilePage from "../../pages/ProfilePage";
 
 export interface RootRoute {
   path: string;
@@ -60,7 +61,8 @@ const appRoutes: Route[][] = [
           // without ID assumes one's own user
           path: "/settings/profile/:userId?",
           name: "Profile",
-          component: Filler,
+          link: "/settings/profile/",
+          component: ProfilePage,
         },
         {
           // without ID assumes one's own user

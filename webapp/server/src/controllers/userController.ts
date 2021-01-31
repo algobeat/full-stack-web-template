@@ -332,7 +332,8 @@ export const userResolvers = {
     },
 
     email: (parent, args, ctx: Context) => {
-      // Only admins or the user himself can see their email
+      // Only admins or the user himself can see their own email.
+      // In applications where the user can choose to make their email public, it would go here too.
       if (
         ctx.user &&
         (ctx.user.id === parent.id || ctx.user.role === 'ADMIN')

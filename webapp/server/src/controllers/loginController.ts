@@ -62,7 +62,7 @@ export const loginResolvers = {
 
       const result = await bcrypt.compare(args.input.password, user.password)
       if (result) {
-        const token = renewJWT(user.email, ctx.res)
+        const token = renewJWT(user.id, ctx.res)
 
         const payload = {
           success: true,
@@ -79,7 +79,7 @@ export const loginResolvers = {
         const refreshExpiry = new Date(Date.now() + expiryIn)
         await ctx.prisma.session.create({
           data: {
-            user: { connect: { email: user.email } },
+            user: { connect: { id: user.id } },
             token: refreshToken,
             expires: refreshExpiry,
           },

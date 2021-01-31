@@ -14,7 +14,7 @@ export function decodeGlobalId(globalId: string) {
 }
 
 export interface JWTPayload {
-  email: string
+  userId: number
   expires: number
   expiresDate: Date
   active: boolean
@@ -22,9 +22,9 @@ export interface JWTPayload {
 }
 
 // 20 minute expiry by default
-export function createJWT(email: string, expiresIn: number = 20 * 60 * 1000) {
+export function createJWT(userId: number, expiresIn: number = 20 * 60 * 1000) {
   return jwt.sign(
-    { email, expires: Date.now() + expiresIn },
+    { userId: userId, expires: Date.now() + expiresIn },
     process.env.AUTH_SIGN_SECRET!,
   )
 }
@@ -41,6 +41,7 @@ export function decodeJWT(token: string): JWTPayload | null {
   if (payload && payload.expires > Date.now()) {
     payload.active = true
     payload.shouldRefresh = payload.expires < Date.now() + 15 * 60 * 1000 // 15 min until expiry? then refresh.
+    payload.shouldRefresh = payload.expires < Date.now() + 15 * 60 * 1000 // 15 min until expiry? then refresh.
   } else {
     payload.active = false
   }
@@ -48,9 +49,9 @@ export function decodeJWT(token: string): JWTPayload | null {
   return payload
 }
 
-export function renewJWT(email: string, res: express.Response) {
+export function renewJWT(userId: number, res: express.Response) {
   // 1 month expiry if remember me, otherwise default.
-  const token = createJWT(email)
+  const token = createJWT(userId)
   const payload = decodeJWT(token)
   res.cookie('authorization', token, {
     httpOnly: true,

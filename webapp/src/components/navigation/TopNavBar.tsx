@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   AppBar,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -9,12 +10,13 @@ import {
 } from "@material-ui/core";
 import styled from "styled-components";
 import MenuIcon from "@material-ui/icons/Menu";
-import { createFragmentContainer } from "react-relay";
+import { createFragmentContainer, RelayProp } from "react-relay";
 import { graphql } from "babel-plugin-relay/macro";
 import { TopNavBar_me } from "./__generated__/TopNavBar_me.graphql";
 import Button from "@material-ui/core/Button";
 import { AccountCircle, ExpandMore } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
+import { logoutMutation } from "../../api/mutations/logout";
 
 const DominantAppBar = styled(AppBar)`
   &&& {
@@ -32,6 +34,7 @@ const ResponsiveMenuButton = styled(IconButton)`
 `;
 
 interface TopNavBarProps {
+  relay: RelayProp;
   drawerToggle?: () => any;
   me: TopNavBar_me;
 }
@@ -57,6 +60,11 @@ function TopNavBarComponent(props: TopNavBarProps) {
   const handleMenuItemClick = (path: string) => {
     handleClose();
     history.push(path);
+  };
+
+  const handleLogoutClick = async () => {
+    handleClose();
+    await logoutMutation(props.relay.environment);
   };
 
   return (
@@ -106,6 +114,8 @@ function TopNavBarComponent(props: TopNavBarProps) {
               >
                 My account
               </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogoutClick}>My account</MenuItem>
             </Menu>
           </React.Fragment>
         ) : (
