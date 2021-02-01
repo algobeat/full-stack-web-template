@@ -29,7 +29,7 @@ const CustomDrawer = styled(Drawer)`
 const SidebarContainer = styled.nav`
   ${({ theme }) => theme.breakpoints.up("sm")} {
     width: ${drawerWidth}px;
-    flexshrink: 0;
+    flex-shrink: 0;
   }
 `;
 
