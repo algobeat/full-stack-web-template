@@ -15,6 +15,7 @@ const mutation = graphql`
       success
       message
       user {
+        id
         name
         email
       }

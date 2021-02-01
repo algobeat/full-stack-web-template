@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Collapse,
   Divider,
@@ -15,9 +15,8 @@ import styled from "styled-components";
 import appRoutes, { ParentRoute } from "./appRoutes";
 import { useHistory, useLocation } from "react-router-dom";
 import { ExitToApp, ExpandLess, ExpandMore } from "@material-ui/icons";
-import environment from "../../relayEnvironment";
-import { logoutMutation } from "../../api/mutations/logout";
 import { pathsMatch } from "../../utils";
+import LogoutConfirmationModal from "../modals/LogoutConfirmationModal";
 
 const drawerWidth = 240;
 
@@ -109,8 +108,10 @@ export function Sidebar(props: SidebarProps) {
   const history = useHistory();
   const location = useLocation();
 
+  const [open, setOpen] = useState(false);
+
   const handleLogoutClick = async () => {
-    await logoutMutation(environment);
+    setOpen(true);
   };
 
   const SidebarContents = (
@@ -171,6 +172,7 @@ export function Sidebar(props: SidebarProps) {
 
   return (
     <SidebarContainer>
+      <LogoutConfirmationModal open={open} setOpen={setOpen} />
       <Hidden smUp>
         <CustomDrawer
           container={container}

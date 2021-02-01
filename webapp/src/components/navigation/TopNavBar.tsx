@@ -115,7 +115,7 @@ function TopNavBarComponent(props: TopNavBarProps) {
                 My account
               </MenuItem>
               <Divider />
-              <MenuItem onClick={handleLogoutClick}>My account</MenuItem>
+              <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
             </Menu>
           </React.Fragment>
         ) : (

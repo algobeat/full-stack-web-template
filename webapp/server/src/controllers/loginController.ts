@@ -51,7 +51,7 @@ export const loginResolvers = {
       // use plaintext for now, and use email as token.
       // TODO: use passport for secure login, and pass a secure token.
       const user = await ctx.prisma.user.findUnique({
-        where: { email: args.input.email },
+        where: { email: args.input.email?.toLowerCase() },
       })
       if (!user) {
         return {

@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { loginMutation } from "../api/mutations/login";
 import environment from "../relayEnvironment";
 import { useSnackbar } from "notistack";
+import { getDisplayName } from "../api/helpers/user.helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -69,7 +70,7 @@ export default function Login() {
       );
       if (response.login?.success) {
         enqueueSnackbar(
-          "Successfully signed in as " + response.login.user?.name,
+          "Successfully signed in as " + getDisplayName(response.login.user),
           { variant: "success" }
         );
         history.push("/");

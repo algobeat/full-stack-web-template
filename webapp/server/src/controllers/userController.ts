@@ -190,7 +190,7 @@ export const userResolvers = {
         const hashedPassword = await bcrypt.hash(args.input.password, 10)
         try {
           const sameEmail = await ctx.prisma.user.findUnique({
-            where: { email: args.input.email },
+            where: { email: args.input.email?.toLowerCase() },
           })
           if (sameEmail) {
             result.success = false
@@ -198,7 +198,7 @@ export const userResolvers = {
           } else {
             const user = await ctx.prisma.user.create({
               data: {
-                email: args.input.email,
+                email: args.input.email?.toLowerCase(),
                 password: hashedPassword,
                 name: args.input.name,
               },
@@ -266,8 +266,6 @@ export const userResolvers = {
     },
 
     editProfile: async (parent, args, ctx: Context) => {
-      console.log('Edit profile args:')
-      console.log(args)
       if (!ctx.user) {
         return { success: false, message: 'You must be logged in to do this' }
       }
@@ -298,7 +296,7 @@ export const userResolvers = {
         const newUser = await ctx.prisma.user.update({
           where: { id: targetUserId },
           data: {
-            email: args.input.email || undefined,
+            email: args.input.email?.toLowerCase() || undefined,
             name: args.input.name || undefined,
           },
         })

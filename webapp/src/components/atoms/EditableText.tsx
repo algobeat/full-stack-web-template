@@ -34,8 +34,8 @@ function EditableTextInternal(
   const onSubmit = async (data: any) => {
     if (data.input !== props.value) {
       await props.onSave(data.input);
-      props.setEditing(false);
     }
+    props.setEditing(false);
   };
 
   const handleInputKeyDown = (e: KeyboardEvent) => {
