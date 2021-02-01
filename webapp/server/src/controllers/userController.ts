@@ -223,8 +223,8 @@ export const userResolvers = {
       }
 
       let targetUserId = ctx.user.id
-      if (args.id) {
-        const providedId = decodeGlobalId(args.id)
+      if (args.input.id) {
+        const providedId = decodeGlobalId(args.input.id)
         if (providedId.type !== 'User') {
           return { success: false, message: 'Provided user ID is invalid' }
         }
@@ -271,8 +271,8 @@ export const userResolvers = {
       }
 
       let targetUserId = ctx.user.id
-      if (args.id) {
-        const providedId = decodeGlobalId(args.id)
+      if (args.input.id) {
+        const providedId = decodeGlobalId(args.input.id)
         if (providedId.type !== 'User') {
           return { success: false, message: 'Provided user ID is invalid' }
         }
@@ -293,11 +293,25 @@ export const userResolvers = {
           return { success: false, message: validateEmail(args.input.email) }
         }
 
+        let newRole = user.role
+        if (args.input.role) {
+          // Only admin can change role
+          if (ctx.user.role === 'ADMIN') {
+            newRole = args.input.role
+          } else if (newRole !== args.input.role) {
+            return {
+              success: false,
+              message: "You do not have permission to change this user's role",
+            }
+          }
+        }
+
         const newUser = await ctx.prisma.user.update({
           where: { id: targetUserId },
           data: {
             email: args.input.email?.toLowerCase() || undefined,
             name: args.input.name || undefined,
+            role: newRole,
           },
         })
 

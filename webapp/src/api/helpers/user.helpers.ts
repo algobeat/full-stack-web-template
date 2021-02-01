@@ -6,3 +6,8 @@ export function getDisplayName(
   }
   return user.name || "User " + user.id;
 }
+
+export const UserRoleChoices = [
+  { value: "USER", label: "User" },
+  { value: "ADMIN", label: "Administrator" },
+];

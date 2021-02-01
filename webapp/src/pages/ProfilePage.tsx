@@ -6,7 +6,7 @@ import Typography from "@material-ui/core/Typography";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Avatar from "@material-ui/core/Avatar";
-import { getDisplayName } from "../api/helpers/user.helpers";
+import { getDisplayName, UserRoleChoices } from "../api/helpers/user.helpers";
 import Grid from "@material-ui/core/Grid";
 import EditableText from "../components/atoms/EditableText";
 import {
@@ -50,42 +50,31 @@ function ProfilePageComponent(props: ProfilePageProps) {
 
   const displayName = getDisplayName(props.props.user);
   const isMe = props.props.user.id === props.props.me?.id;
+  const isAdmin = props.props.me?.role === "ADMIN";
 
-  const onEmailSave = async (data: string) => {
+  const onProfileSave = async (field: string, data: string) => {
     try {
       const result = await editProfile(environment, props.props!.user!.id, {
-        email: data,
+        [field]: data,
       });
       if (!result.editProfile || result.editProfile.success === false) {
-        enqueueSnackbar("Error saving email: " + result.editProfile?.message, {
-          variant: "error",
-        });
+        enqueueSnackbar(
+          `Error saving ${field}: ` + result.editProfile?.message,
+          {
+            variant: "error",
+          }
+        );
       } else {
-        enqueueSnackbar("Email successfully saved!", { variant: "success" });
+        enqueueSnackbar(`${field} successfully saved!`, { variant: "success" });
       }
     } catch (e) {
-      enqueueSnackbar("Error saving email: " + e.message, { variant: "error" });
+      enqueueSnackbar(`Error saving ${field}: ` + e.message, {
+        variant: "error",
+      });
     }
   };
 
-  const onNameSave = async (data: string) => {
-    try {
-      const result = await editProfile(environment, props.props!.user!.id, {
-        name: data,
-      });
-      if (!result.editProfile || result.editProfile.success === false) {
-        enqueueSnackbar("Error saving name: " + result.editProfile?.message, {
-          variant: "error",
-        });
-      } else {
-        enqueueSnackbar("Name successfully saved!", { variant: "success" });
-      }
-    } catch (e) {
-      enqueueSnackbar("Error saving name: " + e.message, { variant: "error" });
-    }
-  };
-
-  const editable = isMe || props.props.me?.role === "ADMIN";
+  const editable = isMe || isAdmin;
 
   return (
     <Root>
@@ -95,32 +84,49 @@ function ProfilePageComponent(props: ProfilePageProps) {
         </Grid>
         <Grid item xs={12}>
           <EditableText
-            onSave={onNameSave}
+            onSave={onProfileSave.bind(null, "name")}
             value={displayName}
             editable={editable}
             typographyProps={{ variant: "h6" }}
           />
         </Grid>
+        <Grid container>
+          <Grid item xs={4} md={2}>
+            <Typography>
+              <b>Role: </b>
+            </Typography>
+          </Grid>
+          <Grid item xs={8} md={10}>
+            <EditableText
+              onSave={onProfileSave.bind(null, "role")}
+              value={props.props.user.role}
+              type={"select"}
+              selectValues={UserRoleChoices}
+              editable={isAdmin}
+            />
+          </Grid>
+        </Grid>
         {isMe && (
-          <Grid item xs={12}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <Typography style={{ display: "inline-block" }}>
+          <React.Fragment>
+            <Grid item xs={4} md={2}>
+              <Typography>
                 <b>Email: </b>
-                <EditableText
-                  onSave={onEmailSave}
-                  value={props.props.user.email!}
-                  editable={editable}
-                />{" "}
+              </Typography>
+            </Grid>
+            <Grid item xs={8} md={10}>
+              <EditableText
+                onSave={onProfileSave.bind(null, "email")}
+                value={props.props.user.email!}
+                editable={editable}
+              />
+            </Grid>
+            <Grid item xs={4} md={2}></Grid>
+            <Grid item xs={12} md={10}>
+              <Typography>
                 <i>This is only visible to you</i>
               </Typography>
-            </div>
-          </Grid>
+            </Grid>
+          </React.Fragment>
         )}
       </Grid>
     </Root>
@@ -148,6 +154,7 @@ export default function ProfilePage() {
             name
             email
             emailConfirmed
+            role
           }
         }
       `}

@@ -80,11 +80,12 @@ function NestedMenuItem(props: NestedMenuItemProps) {
       </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          {props.route.children.map((c) => {
+          {props.route.children.map((c, index) => {
             const ChildIcon = c.icon;
             const matched = pathsMatch(c.path, location.pathname, c.exact);
             return (
               <NestedListItem
+                key={index}
                 button
                 onClick={() => history.push(c.link || c.path)}
                 selected={matched}
@@ -118,8 +119,8 @@ export function Sidebar(props: SidebarProps) {
     <React.Fragment>
       <Toolbar />
       <DrawerContainer>
-        {appRoutes.map((r) => (
-          <React.Fragment>
+        {appRoutes.map((r, index) => (
+          <React.Fragment key={index}>
             <List>
               {r.map((rr) => {
                 if (rr.children) {

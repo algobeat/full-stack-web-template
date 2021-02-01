@@ -21,6 +21,7 @@ const mutation = graphql`
         id
         email
         name
+        role
       }
     }
   }
